@@ -14,5 +14,8 @@ Year | Stars | Missing Problems | Notes
 2017 | 44    | 18b, 20b, 21ab, 23b, 25b |
 2018 | 35    | 13b, 15ab, 17ab, 19b, 20a-21b, 22b, 23b, 24ab, 25b | First year in Go.
 2019 | 1     | 1b- | Bad year. I can't find the code for 1a, but I have the star, so I must have done it.
+2020 | ?     | ?                | Need to pull these in from a different repository.
+2021 | in progress...
+
 
 
