@@ -41,3 +41,7 @@ func TestIsVertical(t *testing.T) {
 		}
 	}
 }
+
+// func TestIsDiagonal
+
+// func TestWalk

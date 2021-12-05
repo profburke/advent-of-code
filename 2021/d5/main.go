@@ -111,12 +111,13 @@ func walk(line Line) (points []Point) {
 	return
 }
 
-func part1(lines []Line) {
-	dangerousPoints := 0
+type Predicate func(Line) bool
+
+func compute(lines []Line, p Predicate) (dangerousPoints int) {
 	vents := make(map[Point]int)
 
 	for _, line := range lines {
-		if isHorizontal(line) || isVertical(line) {
+		if p(line) {
 			points := walk(line)
 			for _, point := range points {
 				vents[point]++
@@ -130,29 +131,21 @@ func part1(lines []Line) {
 		}
 	}
 
-	fmt.Println(dangerousPoints)
+	return
+}
+
+func part1(lines []Line) {
+	hd := func(line Line) bool { return isHorizontal(line) || isVertical(line) }
+
+	fmt.Println(compute(lines, hd))
 }
 
 func part2(lines []Line) {
-	dangerousPoints := 0
-	vents := make(map[Point]int)
-
-	for _, line := range lines {
-		if isHorizontal(line) || isVertical(line) || isDiagonal(line) {
-			points := walk(line)
-			for _, point := range points {
-				vents[point]++
-			}
-		}
+	hvd := func(line Line) bool {
+		return isHorizontal(line) || isVertical(line) || isDiagonal(line)
 	}
 
-	for _, count := range vents {
-		if count > 1 {
-			dangerousPoints++
-		}
-	}
-
-	fmt.Println(dangerousPoints)
+	fmt.Println(compute(lines, hvd))
 }
 
 func main() {
