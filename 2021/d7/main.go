@@ -31,8 +31,10 @@ func intAbs(n int) int {
 	return int(math.Abs(float64(n)))
 }
 
-func part1(positions []int) {
-	fuelSpent := MaxInt
+type FuelCost func(int) int
+
+func compute(positions []int, f FuelCost) (fuelSpent int) {
+	fuelSpent = MaxInt
 	maxPosition := 0
 
 	for _, p := range positions {
@@ -44,7 +46,8 @@ func part1(positions []int) {
 	for newPos := 0; newPos <= maxPosition; newPos++ {
 		fuel := 0
 		for _, p := range positions {
-			fuel += intAbs(newPos - p)
+			moveDistance := intAbs(newPos - p)
+			fuel += f(moveDistance)
 		}
 
 		if fuel < fuelSpent {
@@ -52,10 +55,17 @@ func part1(positions []int) {
 		}
 	}
 
-	fmt.Println(fuelSpent)
+	return
+}
+
+func part1(positions []int) {
+	f := func(d int) int { return d }
+	fmt.Println(compute(positions, f))
 }
 
 func part2(positions []int) {
+	f := func(d int) int { return (d * (d + 1)) / 2 }
+	fmt.Println(compute(positions, f))
 }
 
 func main() {
