@@ -2,8 +2,11 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
+	"log"
 	"os"
+	"sort"
 	"strings"
 )
 
@@ -78,23 +81,101 @@ func scoreLine(line []string) int {
 	return score
 }
 
-func part1(lines [][]string) {
+func part1(lines [][]string) (incompleteLines [][]string) {
 	score := 0
 
 	for _, line := range lines {
-		score += scoreLine(line)
+		lineScore := scoreLine(line)
+		score += lineScore
+
+		if lineScore == 0 {
+			incompleteLines = append(incompleteLines, line)
+		}
 	}
 
 	fmt.Println(score)
+
+	return
+}
+
+func makeCompletion(stack []string) (completer string) {
+	for i := len(stack) - 1; i >= 0; i-- {
+		token := stack[i]
+		switch token {
+		case "(":
+			completer += ")"
+		case "[":
+			completer += "]"
+		case "{":
+			completer += "}"
+		case "<":
+			completer += ">"
+		}
+	}
+	return
+}
+
+func scoreCompleter(completer string) (score int) {
+	for _, token := range completer {
+		score *= 5
+
+		switch string(token) {
+		case ")":
+			score += 1
+		case "]":
+			score += 2
+		case "}":
+			score += 3
+		case ">":
+			score += 4
+		}
+	}
+
+	return
 }
 
 func part2(lines [][]string) {
+	completers := make([]string, 0)
+	stack := make([]string, 0)
+
+	for _, line := range lines {
+		for _, token := range line {
+			if isOpener(token) {
+				stack = append(stack, token)
+			} else { // is closer
+				if len(stack) == 0 {
+					log.Fatal(errors.New("tried to pop from empty stack"))
+				}
+
+				opener := stack[len(stack)-1]
+				stack = stack[:len(stack)-1]
+
+				if !match(opener, token) {
+					log.Fatal(errors.New("corrupted line"))
+				}
+			}
+		}
+
+		completionString := makeCompletion(stack)
+		completers = append(completers, completionString)
+		stack = make([]string, 0)
+	}
+
+	scores := make([]int, 0)
+	for _, completer := range completers {
+		cScore := scoreCompleter(completer)
+		scores = append(scores, cScore)
+	}
+
+	sort.Ints(scores)
+	n := len(scores) / 2
+	fmt.Println(scores[n])
 }
 
 func main() {
 	lines := readLines()
-	part1(lines)
-	part2(lines)
+	incompleteLines := part1(lines)
+	part2(incompleteLines)
 }
 
 // Local Variables:
