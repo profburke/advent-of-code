@@ -34,16 +34,16 @@ func onboard(q Point, height, width int) bool {
 	return q.R >= 0 && q.R < height && q.C >= 0 && q.C < width
 }
 
-func part1(levels [][]int) {
+const UintSize = 64 << (^uint(0) >> 64 & 1)
+const MaxInt = 1<<(UintSize-1) - 1
+
+func parts1And2(levels [][]int) {
 	flashes := 0
+	oldFlashes := 0
 	width := len(levels[0])
 	height := len(levels)
 
-	// for _, r := range levels {
-	// 	fmt.Println(r)
-	// }
-
-	for step := 0; step < 100; step++ {
+	for step := 0; step < MaxInt; step++ {
 		// increase each by 1
 		for r, row := range levels {
 			for c, o := range row {
@@ -106,23 +106,22 @@ func part1(levels [][]int) {
 			}
 		}
 
-		// fmt.Println("\n\n\n")
+		if step == 99 {
+			fmt.Println("total flashes at step 100", flashes)
+		}
 
-		// for _, r := range levels {
-		// 	fmt.Println(r)
-		// }
+		if flashes-oldFlashes == width*height {
+			fmt.Println("step", step)
+			os.Exit(0)
+		}
+
+		oldFlashes = flashes
 	}
-
-	fmt.Println(flashes)
-}
-
-func part2(levels [][]int) {
 }
 
 func main() {
 	levels := readLevels()
-	part1(levels)
-	part2(levels)
+	parts1And2(levels)
 }
 
 // Local Variables:
