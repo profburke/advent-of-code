@@ -22,8 +22,8 @@ func readFish() (fish []int) {
 	return
 }
 
-func part1(fish []int) {
-	for day := 0; day < 80; day++ {
+func compute(days int, fish []int) {
+	for day := 0; day < days; day++ {
 		newfish := make([]int, 0)
 		for _, f := range fish {
 			switch f {
@@ -41,12 +41,34 @@ func part1(fish []int) {
 	fmt.Println(len(fish))
 }
 
+func part1(fish []int) {
+	compute(80, fish)
+}
+
 func part2(fish []int) {
+	population := make([]int, 9)
+	for _, f := range fish {
+		population[f]++
+	}
+
+	for day := 0; day < 256; day++ {
+		p0 := population[0]
+		for s := 0; s < 8; s++ {
+			population[s] = population[s+1]
+		}
+		population[8] = p0
+		population[6] += p0
+	}
+
+	total := 0
+	for _, p := range population {
+		total += p
+	}
+	fmt.Println(total)
 }
 
 func main() {
 	fish := readFish()
-	fmt.Println(fish)
 	part1(fish)
 	part2(fish)
 }
