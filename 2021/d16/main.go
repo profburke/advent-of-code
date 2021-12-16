@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 )
@@ -52,7 +53,61 @@ func parseLiteral(bits string) (l int, s string) {
 	return
 }
 
-func parseOperator(bits string) string {
+const UintSize = 64 << (^uint(0) >> 64 & 1)
+const MaxInt = 1<<(UintSize-1) - 1
+const MinInt = -MaxInt // this isn't quite right, but it's close enough
+
+func calc(vals []int, t int) (value int) {
+	switch t {
+	case 0:
+		for _, v := range vals {
+			value += v
+		}
+	case 1:
+		value = vals[0]
+		for _, v := range vals[1:] {
+			value *= v
+		}
+	case 2:
+		value = MaxInt
+		for _, v := range vals {
+			if v < value {
+				value = v
+			}
+		}
+	case 3:
+		value = MinInt
+		for _, v := range vals {
+			if v > value {
+				value = v
+			}
+		}
+	case 5:
+		if vals[0] > vals[1] {
+			value = 1
+		} else {
+			value = 0
+		}
+	case 6:
+		if vals[0] < vals[1] {
+			value = 1
+		} else {
+			value = 0
+		}
+	case 7:
+		if vals[0] == vals[1] {
+			value = 1
+		} else {
+			value = 0
+		}
+	default:
+		log.Fatal("oops")
+	}
+
+	return
+}
+
+func parseOperator(bits string, t int) (value int, nbits string) {
 	ltb := string(bits[0])
 	bits = bits[1:]
 
@@ -60,21 +115,27 @@ func parseOperator(bits string) string {
 		tl64, _ := strconv.ParseInt(bits[:15], 2, 64)
 		tl := int(tl64)
 		bits = bits[15:]
-		parseBitstring(bits[:tl])
+		value = parseBitstring(bits[:tl], t)
 		bits = bits[tl:]
 	} else {
 		nsub64, _ := strconv.ParseInt(bits[:11], 2, 64)
 		nsub := int(nsub64)
 		bits = bits[11:]
+		var v int
+		vals := make([]int, 0)
 		for j := 0; j < nsub; j++ {
-			bits = parsePacket(bits)
+			v, bits = parsePacket(bits)
+			vals = append(vals, v)
 		}
+
+		value = calc(vals, t)
 	}
 
-	return bits
+	nbits = bits
+	return
 }
 
-func parsePacket(bits string) string {
+func parsePacket(bits string) (value int, nbits string) {
 	vbits := bits[0:3]
 	tbits := bits[3:6]
 	bits = bits[6:]
@@ -91,37 +152,37 @@ func parsePacket(bits string) string {
 		// for some reason if I try
 		// l, i := ....
 		// it thinks I'm declaring a new i
-		var l int
-		l, bits = parseLiteral(bits)
-		fmt.Printf("version: %d type: %d literal %d\n", v, t, l)
+		value, bits = parseLiteral(bits)
 	default:
-		bits = parseOperator(bits)
-		fmt.Printf("version: %d type: %d operator\n", v, t)
+		value, bits = parseOperator(bits, t)
 	}
 
-	return bits
+	nbits = bits
+	return
 }
 
-func parseBitstring(bits string) {
+func parseBitstring(bits string, t int) (value int) {
+	vals := make([]int, 0)
+
 	for len(bits) > 7 { // must be at least the 6 header bits remaining...
-		bits = parsePacket(bits)
+		var v int
+		v, bits = parsePacket(bits)
+		vals = append(vals, v)
 	}
+
+	value = calc(vals, t)
+	return
 }
 
-func part1(input string) {
+func parts1And2(input string) {
 	bits := tobits(input)
-	parseBitstring(bits)
-
+	fmt.Println("value", parseBitstring(bits, 0))
 	fmt.Println(versionSum)
-}
-
-func part2(input string) {
 }
 
 func main() {
 	input := readInput()
-	part1(input)
-	part2(input)
+	parts1And2(input)
 }
 
 // Local Variables:
