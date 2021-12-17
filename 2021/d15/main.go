@@ -8,7 +8,10 @@ import (
 	"strings"
 )
 
-func readRisks() (risks [][]int) {
+var risks [][]int
+
+func readRisks() {
+	risks = make([][]int, 0)
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for scanner.Scan() {
@@ -21,8 +24,6 @@ func readRisks() (risks [][]int) {
 		}
 		risks = append(risks, row)
 	}
-
-	return risks
 }
 
 const UintSize = 64 << (^uint(0) >> 64 & 1)
@@ -104,9 +105,9 @@ func minDistance(distances []int, sptSet map[Point]bool, width int) int {
 	return mindex
 }
 
-func dijkstra(risks [][]int) int {
-	height := len(risks)
-	width := len(risks[0])
+type RiskFunction func(p Point) int
+
+func dijkstra(getRisks RiskFunction) int {
 	nv := height * width
 
 	distances := make([]int, nv)
@@ -128,8 +129,8 @@ func dijkstra(risks [][]int) int {
 			_, ok := sptSet[q]
 			qdex := toIndex(q, width)
 			if !ok && distances[u] != MaxInt &&
-				distances[u]+risks[q.R][q.C] < distances[qdex] {
-				distances[qdex] = distances[u] + risks[q.R][q.C]
+				distances[u]+getRisks(q) < distances[qdex] {
+				distances[qdex] = distances[u] + getRisks(q)
 			}
 		}
 	}
@@ -137,34 +138,53 @@ func dijkstra(risks [][]int) int {
 	return distances[len(distances)-1]
 }
 
-func part1(risks [][]int) {
-	fmt.Println(dijkstra(risks))
+func part1() {
+	fmt.Println(dijkstra(func(p Point) int { return risks[p.R][p.C] }))
 }
 
-func buildMap(m [][]int) (f [][]int) {
-	f = make([][]int, 0)
-
-	for _, row := range m {
-		newrow := make([]int, 0)
-		f = append(f, newrow)
+func adjust(r, a int) int {
+	for i := 0; i < a; i++ {
+		r++
+		if r == 10 {
+			r = 1
+		}
 	}
 
-	return
+	return r
 }
 
-func part2(risks [][]int) {
-	fullrisks := buildMap(risks)
-	fmt.Println(dijkstra(fullrisks))
+func part2() {
+	baseHeight, baseWidth := height, width
+	height, width = 5*height, 5*width
+
+	rf := func(p Point) int {
+		r := p.R
+		c := p.C
+
+		br := r % baseHeight
+		bc := c % baseWidth
+
+		ar := r / baseHeight
+		ac := c / baseWidth
+
+		baseRisk := risks[br][bc]
+		risk := adjust(baseRisk, ar)
+		risk = adjust(risk, ac)
+
+		return risk
+	}
+
+	fmt.Println(dijkstra(rf))
 }
 
 func main() {
-	risks := readRisks()
+	readRisks()
 
 	height = len(risks)
 	width = len(risks[0])
 
-	part1(risks)
-	part2(risks)
+	part1()
+	part2()
 }
 
 // Local Variables:
