@@ -28,7 +28,10 @@ func part1(path: String) {
             elfTotal += val
         }
     }
-
+    if elfTotal > max {
+        max = elfTotal
+    }
+    
     print("Max is \(max)")
 }
 
@@ -65,5 +68,5 @@ func part2(path: String) {
 }
 
 
-// part1(path: CommandLine.arguments[1])
-part2(path: CommandLine.arguments[1])
+part1(path: CommandLine.arguments[1])
+// part2(path: CommandLine.arguments[1])
