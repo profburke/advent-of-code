@@ -7,9 +7,20 @@ enum Command {
     case add(Int)
 }
 
+func draw(_ position: Int, _ x: Int) {
+    let c: String
+    if position == x - 1 || position == x || position == x + 1 {
+        c = "#"
+    } else {
+        c = "."
+    }
+    print(c, terminator: "")
+}
+
 func part1(path: String) {
     var cycle = 1
     var x = 1
+    var position = 0
     
     var sumSignalStrengths = 0
     let keyTimes: Set = [20, 60, 100, 140, 180, 220]
@@ -31,26 +42,40 @@ func part1(path: String) {
         
         // get signal strength if correct cycle
         if keyTimes.contains(cycle) {
-            print("Cycle \(cycle) - \(x)")
             sumSignalStrengths += cycle * x
         }
 
+        draw(position, x)
+        
         cycle += 1
+        position += 1
+        if position == 40 {
+            print()
+            position = 0
+        }
         
         if case let .add(val) = command {
             // get signal strength if correct cycle
             if keyTimes.contains(cycle) {
-                print("Cycle \(cycle) - \(x)")
                 sumSignalStrengths += cycle * x
             }
 
+            draw(position, x)
+            
             x += val
             cycle += 1
+
+            position += 1
+            if position == 40 {
+                print()
+                position = 0
+            }
         }
 
         if cycle > 220 { break }
     }
 
+    print()
     print("Sum of signal strengths: \(sumSignalStrengths)")
 }
 

@@ -1,0 +1,13 @@
+#############
+#...........#
+###A#B#C#D###
+  #A#B#C#D#
+  #########
+
+20087 is too high
+18057 is too high
+17057 is too low
+18055 is not right
+
+B130
+D17925
