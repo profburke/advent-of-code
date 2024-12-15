@@ -13,16 +13,20 @@ type Link struct {
 
 type CaveMap map[string][]string
 
-func readLinks() (links []Link) {
+func readLinks() (links []Link, smalls []string) {
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for scanner.Scan() {
 		line := scanner.Text()
 		caves := strings.Split(line, "-")
-		links = append(links, Link{Ends: [2]string{caves[0], caves[1]}})
+		name := caves[0]
+		links = append(links, Link{Ends: [2]string{name, caves[1]}})
+		if isSmall(name) && name != "start" && name != "end" {
+			smalls = append(smalls, name)
+		}
 	}
 
-	return links
+	return
 }
 
 func buildMap(links []Link) (caveMap CaveMap) {
@@ -84,14 +88,74 @@ func part1(caveMap CaveMap) {
 	fmt.Println(allPaths("start", caveMap, visited, []string{}, 0))
 }
 
-func part2(caveMap CaveMap) {
+var visited2 map[string]bool
+var revisitable string
+var visitCount int
+
+func canVisit(c string) bool {
+	if c == "start" || c == "end" {
+		return false
+	}
+
+	if isSmall(c) {
+		_, seen := visited2[c]
+
+		if !seen {
+			if c == revisitable {
+				visitCount++
+			}
+			return true
+		} else {
+			if c == revisitable && visitCount < 2 {
+				visitCount++
+				return true
+			} else {
+				return false
+			}
+		}
+	}
+
+	return true
+}
+
+func allPaths2(s string, cm CaveMap, path []string, depth int) (count int) {
+	adjacencies := cm[s]
+
+	if s == "end" {
+		fmt.Println(path)
+		return 1
+	}
+
+	for _, c := range adjacencies {
+		if canVisit(c) {
+			path = append(path, c)
+			count += allPaths2(c, cm, path, depth+1)
+		}
+	}
+
+	// delete(visited, s)
+
+	return
+}
+
+func part2(caveMap CaveMap, smalls []string) {
+	total := 0
+
+	for _, small := range smalls {
+		revisitable = small
+		visitCount = 0
+		visited2 = make(map[string]bool)
+		total += allPaths2("start", caveMap, []string{}, 0)
+	}
+
+	fmt.Println(total)
 }
 
 func main() {
-	links := readLinks()
+	links, smalls := readLinks()
 	caveMap := buildMap(links)
 	part1(caveMap)
-	part2(caveMap)
+	part2(caveMap, smalls)
 }
 
 // Local Variables:

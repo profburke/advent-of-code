@@ -4,12 +4,12 @@
 \ http://adventofcode.com/day/1
 
 variable pos
-: inc-pos  1 pos +! ;
-inc-pos
+: pos++  1 pos +! ;
+pos++
 
-: (  1 +  inc-pos ;
+: (  1 +  pos++ ;
 : underground?  dup 0< ;
-: )  1 -  underground? if report bye else inc-pos then ;
+: )  1 -  underground? if pos ? cr bye else pos++ then ;
 
 0
 

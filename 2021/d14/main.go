@@ -70,6 +70,7 @@ func score(template string) (s int) {
 		return ps[i].V < ps[j].V
 	})
 
+	fmt.Println(ps)
 	l := ps[0].V
 	h := ps[len(ps)-1].V
 	s = h - l
@@ -78,20 +79,50 @@ func score(template string) (s int) {
 }
 
 func part1(template string, rules Insertions) {
-	for i := 0; i < 10; i++ {
+	orig := template
+
+	for i := 0; i < 20; i++ {
+		template = step(template, rules)
+	}
+
+	fmt.Println(score(template))
+
+	ol := len(orig)
+
+	fmt.Println("orig", orig)
+	for i := 1; i < len(template)-ol; i++ {
+		s := template[i : i+ol]
+		if s == orig {
+			fmt.Println(i, s)
+		}
+	}
+}
+
+func part2(template string, rules Insertions) {
+	for i := 0; i < 40; i++ {
+		fmt.Println("step", i+1)
 		template = step(template, rules)
 	}
 
 	fmt.Println(score(template))
 }
 
-func part2(template string, i Insertions) {
+// too tired to figure out closed form, but this
+// should let me calculate the length of the string after k steps
+// note: for my input the template is 20 chars long
+func a(k int) int {
+	if k == 0 {
+		return 20
+	}
+	return 2*a(k-1) - 1
 }
+
+// a(40) = 20890720927745
 
 func main() {
 	template, i := readData()
 	part1(template, i)
-	part2(template, i)
+	// part2(template, i)
 }
 
 // Local Variables:
